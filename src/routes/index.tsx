@@ -8,6 +8,7 @@ export default function RoutesComponent(): JSX.Element {
     <Suspense fallback={<div></div>}>
       <Routes>
         <Route path={ROUTES.Login} element={<LoginPage />} />
+        <Route path={ROUTES.PasswordReset} element={<LoginPage />} />
       </Routes>
     </Suspense>
   );

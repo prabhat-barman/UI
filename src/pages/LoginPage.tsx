@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
-import loginImgBg from "../assets/LoginPageBg.svg";
-import { useDispatch } from "react-redux";
-import { getLoginData } from "../redux/slice/login/loginSlice";
+import React from "react";
+import { useLocation } from "react-router-dom";
+import loginImgBg from "../assets/LoginImg/LoginPageBg.svg";
+import Login from "../components/Login/LoginHeader";
+import Carousel from "../components/Login/Carousel";
+import LoginForm from "../components/Login/LoginForm";
+import ResetPassword from "../components/Login/ResetPassword"; // Ensure you import the ResetPassword component
+
 const LoginPage = () => {
-  console.log(loginImgBg);
-  const dispatch = useDispatch<any>();
-  useEffect(() => {
-    dispatch(getLoginData());
-  }, [0]);
+  const location = useLocation();
+
+  // Check if the current URL path is for reset password
+  const isResettingPassword = location.pathname === "/reset-password";
 
   return (
     <div
@@ -18,7 +21,11 @@ const LoginPage = () => {
         backgroundPosition: "right",
       }}
     >
-      LoginPage
+      <Login />
+      <div className="flex justify-center items-center">
+        <Carousel />
+        {isResettingPassword ? <ResetPassword /> : <LoginForm />}
+      </div>
     </div>
   );
 };
