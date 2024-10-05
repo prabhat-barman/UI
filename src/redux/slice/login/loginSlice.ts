@@ -12,8 +12,8 @@ export const getLoginData = createAsyncThunk(
   "Login",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await loginApisCall.loginApiCall();
-      return res.data.data;
+      // const res = await loginApisCall.loginApiCall();
+      // return res.data.data;
     } catch (err) {
       rejectWithValue("Error in Response");
     }

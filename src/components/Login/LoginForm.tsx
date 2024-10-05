@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import { Formik, Field, Form, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { getLoginData } from "../../redux/slice/login/loginSlice";
+import loginApi from "../../apis/loginApis/loginApis.service";
 
 // Define the types for form values
 interface LoginFormValues {
   email: string;
   password: string;
-  captcha: string; // Add captcha field
+  captcha: string;
 }
 
 // Validation schema using Yup
@@ -24,30 +27,72 @@ const validationSchema = Yup.object({
 const generateCaptcha = () => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let captcha = "";
-  for (let i = 0; i < 6; i++) {
-    captcha += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return captcha;
+  return Array.from({ length: 6 }, () =>
+    characters.charAt(Math.floor(Math.random() * characters.length))
+  ).join("");
 };
 
 const LoginForm: React.FC = () => {
+  const dispatch = useDispatch();
   const initialValues: LoginFormValues = {
     email: "",
     password: "",
     captcha: "",
   };
+
   const [showPassword, setShowPassword] = useState(false);
   const [captcha, setCaptcha] = useState(generateCaptcha());
   const [captchaError, setCaptchaError] = useState("");
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    setShowPassword((prev) => !prev);
   };
 
   const refreshCaptcha = () => {
     setCaptcha(generateCaptcha());
-    setCaptchaError(""); // Reset CAPTCHA error when refreshing
+    setCaptchaError("");
+  };
+
+  const submitLoginData = async (
+    values: LoginFormValues,
+    { setSubmitting, setErrors }: FormikHelpers<LoginFormValues>
+  ) => {
+    if (values.captcha !== captcha) {
+      setCaptchaError("Incorrect CAPTCHA. Please try again.");
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      // Make the API call
+      const response = await loginApi.userLogin(values);
+
+      // Handle successful login here
+      console.log("Login successful", response.data);
+      // You can dispatch a success action or redirect the user if needed
+    } catch (error: any) {
+      setSubmitting(false);
+
+      // Handle different error responses
+      if (error.response) {
+        // Server responded with a status other than 200 range
+        if (error.response.status === 404) {
+          setErrors({ email: "User not found. Please check your email." });
+        } else if (error.response.status === 401) {
+          setErrors({ password: "Incorrect password. Please try again." });
+        } else {
+          setErrors({ email: "An error occurred. Please try again later." });
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        setErrors({ email: "Network error. Please check your connection." });
+      } else {
+        // Something else caused the error
+        setErrors({ email: "An unexpected error occurred." });
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -58,22 +103,10 @@ const LoginForm: React.FC = () => {
           Sign in with your email address and password.
         </p>
 
-        {/* Formik form */}
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={(
-            values: LoginFormValues,
-            { setSubmitting }: FormikHelpers<LoginFormValues>
-          ) => {
-            if (values.captcha !== captcha) {
-              setCaptchaError("Incorrect CAPTCHA. Please try again.");
-              setSubmitting(false);
-              return;
-            }
-            console.log("Form data", values);
-            setSubmitting(false);
-          }}
+          onSubmit={submitLoginData}
         >
           {({ isSubmitting, isValid, dirty }) => (
             <Form className="w-full">
