@@ -1,3 +1,47 @@
-.LoginPage{
+.LoginPage {
+}
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+@media print {
+  /* Hide everything with the class 'no-print' */
+  .no-print {
+    display: none;
+  }
 
+  /* Hide the URL, title, and date/time */
+  @page {
+    margin: 0;
+  }
+
+  body {
+    margin: 20px;
+    font-family: Arial, sans-serif;
+  }
+
+  /* Optional: Add any additional styles for printing */
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+    padding: 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
 }
